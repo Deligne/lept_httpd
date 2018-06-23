@@ -21,33 +21,17 @@ int startup(int argc, char const *argv[]) {
 	return sockfd;
 }
 
-int get_msg(int sockfd) {
-	char buf[MAXSIZE];
-	int n;
-	n = recv(sockfd, buf, MAXSIZE, 0);
-	buf[n] = '\0';
-	printf("get: %s\n", buf);
-	return 1;
-}
 
-int send_msg(int sockfd, char *msg) {
-	int n;
-	n = write(sockfd, msg, strlen(msg));
-	printf("send: %s\n", msg);
-}
 
 
 int main(int argc, char const *argv[])
 {
 	int sockfd;
 	char msg[MAXSIZE];
+	int n;
 	sockfd = startup(argc, argv);
-	while(1) {
-		fgets(msg, 1024, stdin);
-		write(sockfd, msg, strlen(msg));
-		printf("send: %s\n", msg);
-		get_msg(sockfd);
-	}
+	// str_cli(stdin, sockfd);
+	str_add(sockfd);
 	close(sockfd);
-	return 0;
+	exit(0);
 }
