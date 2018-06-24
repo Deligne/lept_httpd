@@ -1,5 +1,66 @@
 #include "lept_httpd.h"
 
+void str_cli_select(FILE *fp, int sockfd)
+{
+	int 	maxfdpl;
+	fd_set rset;
+	char sendline[MAXSIZE], recvline[MAXSIZE];
+	FD_ZERO(&rset);
+	for(;;) {
+		FD_SET(fileno(fp), &rset);
+		FD_SET(sockfd, &rset);
+		maxfdpl = max(fileno(fp), sockfd) + 1;
+		select(maxfdpl, &rset, NULL, NULL, NULL);
+		if(FD_ISSET(sockfd, &rset)) {
+			if(read(sockfd, recvline, sizeof(recvline)) == 0 )
+				err_sys("str_cli: server terminated prematurely\n");
+			fputs(recvline, stdout);
+		}
+		if(FD_ISSET(fileno(stdin), &rset)) {
+			if(fgets(sendline, MAXSIZE, stdin) ==NULL) 
+				return;
+			write(sockfd, sendline, strlen(sendline));
+		}
+
+	}
+}
+
+void str_cli_shut(FILE *fp, int sockfd) {
+	int stdineof, maxfdpl;
+	char buf[MAXSIZE];
+	fd_set rset;
+	int n;
+	FD_ZERO(&rset);
+	stdineof = 0;
+	for(;;) {
+		if(stdineof == 0)
+			FD_SET(fileno(fp), &rset);
+		FD_SET(sockfd, &rset);
+		maxfdpl = max(fileno(fp), sockfd);
+		select(maxfdpl, &rset, NULL, NULL, NULL);
+		if(FD_ISSET(sockfd, &rset)) {
+			if((n = read(sockfd, buf, sizeof(buf))) == 0) {
+				if(stdineof == 1)
+					return;
+				else 
+					err_sys("str_cli_shut: server terminated permaturely.");
+			}
+			write(fileno(stdout), buf, n);
+		}
+
+		if(FD_ISSET(fileno(fp), &rset)) {
+			if((n = read(fileno(fp), buf, sizeof(buf)) == 0)) {
+				stdineof == 1;
+				FD_CLR(fileno(fp), &rset);
+				shutdown(sockfd, SHUT_WR);
+				continue;
+			}
+			write(sockfd, buf, n);
+		}
+		
+	}
+}s
+
 
 void Listen(int fd, int backlog) {
 	char *ptr;

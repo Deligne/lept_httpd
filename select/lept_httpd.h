@@ -20,18 +20,10 @@
 #include<errno.h>
 
 #define MAXSIZE 1024
-
+#define SERV_PORT 80
 #define err_sys(error_message)	do { perror(error_message); exit(-1); } while(0)
 
 int max(int a, int b) {
 	return a>b?a:b;
 }
-
-
-void Listen(int fd, int backlog);
-int startup(u_short );
-void echo(int connfd);
-int accept_request(int listenfd);
-unsigned int get_line(int fd, char *buf, unsigned int size);
-void hello_world(int);
 #endif
