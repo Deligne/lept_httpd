@@ -40,6 +40,20 @@ void dg_cli(FILE *fp, int sockfd, struct sockaddr *servaddr, socklen_t len) {
 	}
 }
 
+void dg_cli_conn(FILE *fp, int sockfd, struct sockaddr *servaddr, socklen_t len) {
+	int 	n;
+	char sendline[MAXSIZE], recvline[MAXSIZE];
+
+	connect(sockfd, (struct sockaddr *) servaddr, len);
+
+	while(fgets(sendline, MAXSIZE, fp) != NULL) {
+		write(sockfd, sendline, strlen(sendline));
+		n = read(sockfd, recvline, sizeof(recvline));
+		recvline[n] == 0;
+		fputs(recvline, stdout);
+	}
+}
+
 
 int main(int argc, char const *argv[])
 {
@@ -53,6 +67,6 @@ int main(int argc, char const *argv[])
 	servaddr.sin_family = AF_INET;
 	inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-	dg_cli(stdin, sockfd, (struct sockaddr*)&servaddr, len);
+	dg_cli_conn(stdin, sockfd, (struct sockaddr*) &servaddr, len);
 	return 0;
 }
