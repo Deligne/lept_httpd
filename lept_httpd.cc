@@ -12,15 +12,17 @@ void Listen(int fd, int backlog) {
 	}
 }
 
-void echo(int connfd) {
+void chat(int connfd) {
 	char buf[MAXSIZE];
 	while(1) {
-		int n = read(connfd,buf, MAXSIZE);
-		if(n > 0) {
-			buf[n] = '\0';
-			printf("msg: %s\n", buf);
-		}
-		write(connfd, buf, n);
+		int n;
+		if((n = read(connfd,buf, MAXSIZE)) == 0)
+			return;
+		buf[n] = '\0';
+		printf("msg: %s\n", buf);
+		scanf("%s", buf);
+		if((n =write(connfd, buf, strlen(buf))) < 0)
+			return;
 	}
 }
 
@@ -202,7 +204,7 @@ int accept_request(int listenfd) {
 		if((pid = fork()) == 0) {
 			close(listenfd);
 			printf("child_pid: %d\n", getpid());
-			str_add(connfd);
+			str_echo(connfd);
 			if((getpeername(connfd, (struct sockaddr *) &temp_addr, &len)) == 0) {
     			//printf("pid:%d accept connection from  ip: %s.\n", getpid(), inet_ntop(AF_INET, &temp_addr, buf, sizeof(buf)));
     			;
@@ -213,14 +215,6 @@ int accept_request(int listenfd) {
 	}
 }
 
-
-int main(int argc, char const *argv[])
-{
-	int sockfd;
-	sockfd = startup(80);
-	accept_request(sockfd);
-	return 0;
-}
 
 
 
