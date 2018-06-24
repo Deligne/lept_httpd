@@ -59,7 +59,7 @@ void str_cli_shut(FILE *fp, int sockfd) {
 		}
 		
 	}
-}s
+}
 
 
 void Listen(int fd, int backlog) {
@@ -207,6 +207,13 @@ void sig_pipe(int signo) {
 	int stat;
 	pid = wait(&stat);
 	printf("BROKE PIPE\n");
+}
+
+void daytime(int sockfd) {
+	time_t t = time(NULL);
+	char msg[MAXSIZE];
+	char *s = ctime(&t);
+	write(sockfd, s, strlen(s));
 }
 
 void str_add(int sockfd) {
